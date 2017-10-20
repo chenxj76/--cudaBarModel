@@ -8,4 +8,8 @@ CPU:
 GPU:
 	nvcc -arch=sm_35 bar.cu -c
 clean:
+<<<<<<< HEAD
 	rm *.o
+=======
+	rm *.o
+>>>>>>> d23285bd597c8ba23bf4d16cb949eb997b15c9b7
