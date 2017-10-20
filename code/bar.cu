@@ -1,51 +1,52 @@
 #include "bar.h"
 #include <cuda_runtime.h>
 #include <stdio.h>
+double*h_u,*h_v,*h_u0,*h_v0,*h_du,*h_dv;
+double*d_u,*d_v,*d_u0,*d_v0,*d_du,*d_dv;
 __global__ void GPUInitOnDevice(double*u,double*v,int x,int y);
 __global__ void GPUCalcBar(double*u,double*v,double*u0,double*v0,double*du,double*dv);
 
-void Manage_Memory(int phase,double**u,double**v,double**u0,double**v0,double**dd_u,double**dd_v,double**dd_u0,double**dd_v0,double**dd_du,double**dd_dv){
+void Manage_Memory(int phase,double**h_u,double**h_v,double**h_u0,double**h_v0,double**d_u,double**d_v,double**d_u0,double**d_v0,double**d_du,double**d_dv){
 	cudaError_t Error;
 	size_t size=nx*ny*sizeof(double);
 	if (phase==1){
-		*u=(double*)malloc(size);
-		*v=(double*)malloc(size);
-		*u0=(double*)malloc(size);
-		*v0=(double*)malloc(size);
-		Error=cudaMalloc((void**)dd_u,size);
-		Error=cudaMalloc((void**)dd_u0,size);
-		Error=cudaMalloc((void**)dd_v,size);
-		Error=cudaMalloc((void**)dd_v0,size);
-		Error=cudaMalloc((void**)dd_du,size);
-		Error=cudaMalloc((void**)dd_dv,size);
+		*h_u=(double*)malloc(size);
+		*h_v=(double*)malloc(size);
+		*h_u0=(double*)malloc(size);
+		*h_v0=(double*)malloc(size);
+		Error=cudaMalloc((void**)d_u,size);
+		Error=cudaMalloc((void**)d_u0,size);
+		Error=cudaMalloc((void**)d_v,size);
+		Error=cudaMalloc((void**)d_v0,size);
+		Error=cudaMalloc((void**)d_du,size);
+		Error=cudaMalloc((void**)d_dv,size);
 		printf("MemoryMalloc:%s\n",cudaGetErrorString(Error));
 	}
 	if (phase==2){
-		free(*u);
-		free(*v);
-		free(*u0);
-		free(*v0);
-		Error=cudaFree(*dd_u);
-		Error=cudaFree(*dd_u0);
-		Error=cudaFree(*dd_v);
-		Error=cudaFree(*dd_v0);
-		Error=cudaFree(*dd_du);
-		Error=cudaFree(*dd_dv);
+		free(*h_u);
+		free(*h_v);
+		free(*h_u0);
+		free(*h_v0);
+		Error=cudaFree(*d_u);
+		Error=cudaFree(*d_u0);
+		Error=cudaFree(*d_v);
+		Error=cudaFree(*d_v0);
+		Error=cudaFree(*d_du);
+		Error=cudaFree(*d_dv);
 	}
 
 }
 
-void Manage_Comms(int phase,double*hh_u,double*dd_u){
+void Manage_Comms(int phase,double**h_u0,double**d_u0){
 
 	cudaError_t Error;
 	size_t size=nx*ny*sizeof(double);
 	if (phase==2){				
-	cudaMemcpy(hh_u,dd_u,size,cudaMemcpyDeviceToHost);
-		Error=cudaMemcpy(hh_u,dd_u,size,cudaMemcpyDeviceToHost);
+		Error=cudaMemcpy(*h_u0,*d_u0,size,cudaMemcpyDeviceToHost);
 		printf("device to host:%s\n",cudaGetErrorString(Error));
 		}
 	if (phase==1){
-		Error=cudaMemcpy(dd_u,hh_u,size,cudaMemcpyHostToDevice);
+		Error=cudaMemcpy(*d_u0,*h_u0,size,cudaMemcpyHostToDevice);
 		printf("host to device:%s\n",cudaGetErrorString(Error));}
 }
 
@@ -59,11 +60,11 @@ unsigned int idx = iy*x+ ix;//globalIdx
 			v[idx] = 0.0;			
 	}
 }
-void Call_GPU_Init(double*u0,double*v0,int x,int y){	
+void Call_GPU_Init(double**d_u0,double**d_v0,int x,int y){	
 	dim3 block(BLOCK_SIZE,BLOCK_SIZE);
 	dim3 grid((nx+block.x-1)/block.x,(ny+block.y-1)/block.y);
 	cudaError_t Error;
-	GPUInitOnDevice<<<grid,block>>>(u0,v0,x,y);
+	GPUInitOnDevice<<<grid,block>>>(*d_u0,*d_v0,x,y);
 	Error=cudaDeviceSynchronize();
 	printf("InitDeviceSynchronize:%s\n",cudaGetErrorString(Error));
 }
@@ -72,7 +73,7 @@ __global__ void GPUCalcBar(double*u,double*v,double*u0,double*v0,double*du,doubl
 unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x; //matrixIdx
 unsigned int iy = threadIdx.y + blockIdx.y * blockDim.y;//matrixIdx
 unsigned int idx = iy*nx+ ix;//globalIdx
-		double*hh_u0;
+
 		double sldx, sldy; 
 		int ncount;
 		sldx = (1.0 / dx)/ dx;
@@ -123,17 +124,17 @@ unsigned int idx = iy*nx+ ix;//globalIdx
 				u0[idx] = 0;
 				v0[idx] = 0;
 		}
-		if (ncount == 5000){
-		 *hh_u0=*u0;
-		}
+	//	if (ncount == 5000){
+	//	 h_u0[idx]=u0[idx];   //问题出在这CalcDeviceSynchronize:an illegal memory access was encountered！
+	//	}
 	
 	}	
 }
-void Call_GPU_Calc_Bar(double*u,double*v,double*u0,double*v0,double*du,double*dv){
+void Call_GPU_Calc_Bar(double**d_u,double**d_v,double**d_u0,double**d_v0,double**d_du,double**d_dv){
 	dim3 block(BLOCK_SIZE,BLOCK_SIZE);
 	dim3 grid((nx+block.x-1)/block.x,(ny+block.y-1)/block.y);
 	cudaError_t Error;
-	GPUCalcBar<<<grid,block>>>(u,v,u0,v0,du,dv);
+	GPUCalcBar<<<grid,block>>>(*d_u,*d_v,*d_u0,*d_v0,*d_du,*d_dv);
 	Error=cudaDeviceSynchronize();
 	printf("CalcDeviceSynchronize:%s\n",cudaGetErrorString(Error));
 }

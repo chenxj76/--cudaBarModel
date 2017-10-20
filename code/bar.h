@@ -12,9 +12,7 @@
 #define w 1.5
 #define D 1.0
 
-void Manage_Memory(int phase,double**u,double**v,double**u0,double**v0,double**dd_u,double**dd_v,double**dd_u0,double**dd_v0,double**dd_du,double**dd_dv);
-void Manage_Comms(int phase,double*hh_u,double*dd_u);
-void Call_GPU_Init(double*u0,double*v0,int x,int y);
-double Func_FG(int phase,double*x,double*y);
-void Call_GPU_Calc_Bar(double*u,double*v,double*u0,double*v0,double*du,double*dv);
-//void Save_Results(double*hh_u0);
+void Manage_Memory(int phase,double**h_u,double**h_v,double**h_u0,double**h_v0,double**d_u,double**d_v,double**d_u0,double**d_v0,double**d_du,double**d_dv);
+void Manage_Comms(int phase,double**h_u0,double**d_u0);
+void Call_GPU_Init(double**d_u0,double**d_v0,int x,int y);
+void Call_GPU_Calc_Bar(double**d_u,double**d_v,double**d_u0,double**d_v0,double**d_du,double**d_dv);
