@@ -19,7 +19,7 @@ int main()
 	FILE *pFile;
 	pFile = fopen("Upattern", "w");
 	for (int idx= 0; idx < nx*ny; idx++){
-      if (idx%nx==0 && idx>0 && idx<nx*ny)  fprintf(pFile, "\n");
+      if (idx%nx==0 && idx>0)  fprintf(pFile, "\n");
 	  fprintf(pFile, "%18.7e", h_u0[idx]);	
 	}
 	fclose(pFile);
