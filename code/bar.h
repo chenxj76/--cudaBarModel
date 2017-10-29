@@ -1,5 +1,5 @@
-#define BLOCK_SIZE 30
-#define TILE_SIZE 10
+#define BLOCK_SIZE 32
+
 //*******these are parameters about BarModel of exitable system *******
 #define nx 300
 #define ny 300
@@ -12,7 +12,12 @@
 #define w 1.5
 #define D 1.0
 
-void Manage_Memory(int phase,double**h_u,double**h_v,double**h_u0,double**h_v0,double**d_u,double**d_v,double**d_u0,double**d_v0,double**d_du,double**d_dv);
-void Manage_Comms(int phase,double**h_u0,double**d_u0);
-void Call_GPU_Init(double**d_u0,double**d_v0,int x,int y);
-void Call_GPU_Calc_Bar(double**d_u,double**d_v,double**d_u0,double**d_v0,double**d_du,double**d_dv);
+void Manage_Memory(int phase);
+void Manage_Comms(int phase);
+void Call_GPU_Init();
+void Call_GPU_Boun();
+void Call_GPU_Space();
+void Call_GPU_PlaneWave(int ncount);
+void Call_GPU_ForEuler();
+void Call_GPU_Update();
+void Call_GPU_Trancation();
