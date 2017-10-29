@@ -1,0 +1,3 @@
+CPUtime=22.666548
+GPUtime=2.298928
+Speedup=CPUtime/GPUtime=10

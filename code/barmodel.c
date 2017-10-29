@@ -6,13 +6,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "bar.h"
+#include "systime.h"
 extern double*h_u,*h_v,*h_u0,*h_v0,*h_du,*h_dv;
 extern double*d_u,*d_v,*d_u0,*d_v0,*d_du,*d_dv;
 void File_save(int n);
+double Start,End;
 int main()
 {
 	Manage_Memory(1);	
 	Call_GPU_Init();//直接在GPU里初始化，会有问题吗？
+	Start=cpuSecond();
 	for(int ncount=0;ncount<5001;ncount++){
 		Call_GPU_Boun();
 		Call_GPU_Space();
@@ -26,6 +29,8 @@ int main()
 			File_save(ncount);
 		}
 	}
+	End=cpuSecond()-Start;//这样子计算GPU的时间是不是不准确，因为包括了数据从GPU送到CPU的时间。
+	printf("GPUtime=%f\n",End);
 	//Manage_Comms(2);
 	//File_save();
 	Manage_Memory(2);

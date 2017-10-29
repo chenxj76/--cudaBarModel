@@ -43,9 +43,9 @@ void Manage_Comms(int phase){
 	size_t size=(nx+2)*(ny+2)*sizeof(double);
 	if (phase==2){				
 		Error=cudaMemcpy(h_u0,d_u0,size,cudaMemcpyDeviceToHost);
-		printf("device to host:%s\n",cudaGetErrorString(Error));
+		if (Error != cudaSuccess)printf("device to host:%s\n",cudaGetErrorString(Error));
 		}
 	if (phase==1){
 		Error=cudaMemcpy(d_u0,h_u0,size,cudaMemcpyHostToDevice);
-		printf("host to device:%s\n",cudaGetErrorString(Error));}
+		if (Error != cudaSuccess)printf("host to device:%s\n",cudaGetErrorString(Error));}
 }
