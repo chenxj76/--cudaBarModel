@@ -29,9 +29,9 @@ int main()
 			File_save(ncount);
 		}
 	}
+	//Manage_Comms(2);
 	End=cpuSecond()-Start;//这样子计算GPU的时间是不是不准确，因为包括了数据从GPU送到CPU的时间。
 	printf("GPUtime=%f\n",End);
-	//Manage_Comms(2);
 	//File_save();
 	Manage_Memory(2);
 	return 0;

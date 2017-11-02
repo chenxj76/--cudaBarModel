@@ -1,4 +1,5 @@
 writerObj=VideoWriter('test.avi');  %// 定义一个视频文件用来存动画  
+writerObj.FrameRate=3;
 open(writerObj);                    %// 打开该视频文件  
 for i = 0:50:5000  
     f1 = figure(1);
