@@ -1,3 +1,18 @@
-CPUtime=22.666548
-GPUtime=2.298928
+300*300
+CPUtime=22.666548（没有-O3优化:g++ BarModel1.cpp  -o bar.run）
+GPUtime=2.298928(有用-O3优化)
 Speedup=CPUtime/GPUtime=10
+
+300*300
+-O3优化g++ BarModel1.cpp  -O3 -o bar.run
+CPUtime=12.116746
+GPUtime=2.298928
+
+
+1000*1000
+-O3优化 g++ BarModel1.cpp -fopenmp -O3 -o bar.run
+CPUtime=150.912364
+OpenMP(8)CPUtime2=88.213
+OpenMP(4)CPUtime2=85.562
+OpenMP(2)CPUtime2=107.358
+GPUtime=26.398791
